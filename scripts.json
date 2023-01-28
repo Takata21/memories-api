@@ -2,8 +2,8 @@
   "$schema": "https://deno.land/x/denon@2.5.0/schema.json",
   "scripts": {
     "start": {
-      "cmd": "deno run index.js",
-      "desc": "run my index.js file"
+      "cmd": "deno run -A src/index.js",
+      "desc": "run my src/index.js file"
     }
   }
 }
