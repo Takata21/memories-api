@@ -1,7 +1,28 @@
 import User from '../models/User.js'
 import createError from 'npm:http-errors'
 import { signAccessToken } from '../helpers/signAccessToken.js'
-export function login(req, res) {
+export async function login(req, res, next) {
+  const { email, password } = req.body
+  try {
+    const userFound = await User.findOne({
+      email: email,
+    })
+
+    if (!userFound) throw createError.Unauthorized('The user does not exists')
+
+    const isMatch = await userFound.validPassword(password)
+
+    if (!isMatch) {
+      throw createError.Unauthorized('password or email incorrect')
+    }
+
+    const token = await signAccessToken(userFound.id)
+    res.json({ token })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+
   res.send('login')
 }
 export async function register(req, res, next) {
@@ -31,6 +52,15 @@ export async function register(req, res, next) {
     next(error)
   }
 }
-export function profile(req, res) {
-  res.send('profile')
+export async function profile(req, res, next) {
+  try {
+    const user = await User.findOne({ _id: req.userId }).select('-password')
+
+    if (!user) return res.status(401).json({ message: 'User not found' })
+
+    res.json(user)
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
 }
